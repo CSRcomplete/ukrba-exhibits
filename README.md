@@ -27,6 +27,9 @@ CMS via `wix-http-functions.js`.
 | `EXHIBITS_API_KEY` | Shared secret sent to Wix as `x-api-key` | (required) |
 | `WIX_ENDPOINT` | Wix function URL | `https://www.ukrba.org/_functions/exhibitLead` |
 | `VIDEO_URL` | Video source | `/video.mp4` |
+| `VIDEO_FIT` | `cover` fills the screen (may crop edges); `contain` shows the whole video | `cover` |
+| `VIDEO_BACKGROUND` | Colour of the bars when `VIDEO_FIT=contain`, e.g. `#ffffff` | black |
+| `SHOW_HINT` | Set `false` to hide the "Touch the screen" pill (if the video already says it) | `true` |
 | `INACTIVITY_SECONDS` | Idle time before the form closes and the video resumes | `60` |
 
 Replacing the video: swap `public/video.mp4` (keep it small, H.264 MP4) or host it elsewhere and set `VIDEO_URL`.

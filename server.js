@@ -43,7 +43,13 @@ app.use(express.json({ limit: "10kb" }));
 app.get("/health", (req, res) => res.type("text").send("ok"));
 
 app.get("/config", (req, res) =>
-  res.json({ videoUrl: VIDEO_URL, inactivitySeconds: INACTIVITY_SECONDS })
+  res.json({
+    videoUrl: VIDEO_URL,
+    inactivitySeconds: INACTIVITY_SECONDS,
+    videoFit: process.env.VIDEO_FIT === "contain" ? "contain" : "cover",
+    videoBackground: process.env.VIDEO_BACKGROUND || "",
+    showHint: process.env.SHOW_HINT !== "false",
+  })
 );
 
 app.post("/api/submit", async (req, res) => {

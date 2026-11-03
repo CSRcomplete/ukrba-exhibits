@@ -22,13 +22,15 @@
       cursor: pointer; z-index: 5; width: 100%; height: 100%;
     }
     #hint {
-      position: fixed; left: 50%; bottom: 8vh; transform: translateX(-50%);
+      position: fixed; left: 50%; top: 3vh; transform: translateX(-50%);
       z-index: 6; pointer-events: none; color: #fff; text-align: center;
-      font-size: clamp(1.1rem, 3vw, 2rem); font-weight: 600; letter-spacing: .03em;
-      padding: .6em 1.4em; border-radius: 999px;
-      background: rgba(0,0,0,.45); text-shadow: 0 1px 4px rgba(0,0,0,.6);
+      white-space: nowrap; max-width: 94vw;
+      font-size: clamp(.9rem, 2vw, 1.4rem); font-weight: 700; letter-spacing: .03em;
+      padding: .5em 1.2em; border-radius: 999px;
+      background: rgba(20,110,40,.85); box-shadow: 0 2px 10px rgba(0,0,0,.25);
       animation: pulse 2.2s ease-in-out infinite;
     }
+    #hint.off { display: none; }
     @keyframes pulse {
       0%, 100% { opacity: .55; transform: translateX(-50%) scale(1); }
       50% { opacity: 1; transform: translateX(-50%) scale(1.05); }
@@ -137,6 +139,9 @@
       fetch("/config").then(function (r) { return r.json(); })
         .then(function (c) {
           video.src = c.videoUrl || "/video.mp4";
+          if (c.videoFit === "contain") video.style.objectFit = "contain";
+          if (c.videoBackground) { video.style.background = c.videoBackground; document.body.style.background = c.videoBackground; }
+          if (c.showHint === false) document.getElementById("hint").classList.add("off");
           if (c.inactivitySeconds > 0) INACTIVITY_MS = c.inactivitySeconds * 1000;
           play();
         })
