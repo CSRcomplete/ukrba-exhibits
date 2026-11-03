@@ -9,6 +9,8 @@ const WIX_ENDPOINT =
 const EXHIBITS_API_KEY = process.env.EXHIBITS_API_KEY || "";
 const VIDEO_URL = process.env.VIDEO_URL || "/video.mp4";
 
+const INACTIVITY_SECONDS = Number(process.env.INACTIVITY_SECONDS) || 60;
+
 const RATE_LIMIT = 20;
 const RATE_WINDOW_MS = 10 * 60 * 1000;
 const hits = new Map();
@@ -40,7 +42,9 @@ app.use(express.json({ limit: "10kb" }));
 
 app.get("/health", (req, res) => res.type("text").send("ok"));
 
-app.get("/config", (req, res) => res.json({ videoUrl: VIDEO_URL }));
+app.get("/config", (req, res) =>
+  res.json({ videoUrl: VIDEO_URL, inactivitySeconds: INACTIVITY_SECONDS })
+);
 
 app.post("/api/submit", async (req, res) => {
   const body = req.body || {};
@@ -112,7 +116,14 @@ app.post("/api/submit", async (req, res) => {
   }
 });
 
-app.use(express.static(path.join(__dirname, "public")));
+// Let the browser keep the video cached so the loop keeps playing if the stand wifi drops.
+app.use(
+  express.static(path.join(__dirname, "public"), {
+    setHeaders: (res, filePath) => {
+      if (/\.(mp4|webm)$/i.test(filePath)) res.setHeader("Cache-Control", "public, max-age=86400");
+    },
+  })
+);
 
 app.use((err, req, res, next) => {
   if (res.headersSent) return next(err);

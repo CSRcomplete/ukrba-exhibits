@@ -10,7 +10,9 @@
       margin: 0; height: 100%; overflow: hidden; background: #000;
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
       -webkit-tap-highlight-color: transparent; user-select: none;
+      overscroll-behavior: none; touch-action: manipulation;
     }
+    #tap { cursor: none; }
     #bg {
       position: fixed; inset: 0; width: 100%; height: 100%;
       object-fit: cover; background: #000;
@@ -81,8 +83,8 @@
 </head>
 <body>
   <video id="bg" autoplay muted loop playsinline preload="auto"></video>
-  <button id="tap" type="button" aria-label="Touch the screen to register"></button>
-  <div id="hint">Touch the screen to register</div>
+  <button id="tap" type="button" aria-label="Touch the screen to take the pledge"></button>
+  <div id="hint">Touch the screen to take the pledge</div>
 
   <div id="overlay" role="dialog" aria-modal="true" aria-labelledby="title">
     <div id="modal">
@@ -133,8 +135,40 @@
       var idleTimer = null, thanksTimer = null, open = false, userPaused = false;
 
       fetch("/config").then(function (r) { return r.json(); })
-        .then(function (c) { video.src = c.videoUrl || "/video.mp4"; play(); })
+        .then(function (c) {
+          video.src = c.videoUrl || "/video.mp4";
+          if (c.inactivitySeconds > 0) INACTIVITY_MS = c.inactivitySeconds * 1000;
+          play();
+        })
         .catch(function () { video.src = "/video.mp4"; play(); });
+
+      // Keep the screen on for the whole event (Screen Wake Lock API, needs HTTPS).
+      var wakeLock = null;
+      function keepAwake() {
+        if (!("wakeLock" in navigator) || document.hidden) return;
+        navigator.wakeLock.request("screen").then(function (l) {
+          wakeLock = l;
+          l.addEventListener("release", function () { wakeLock = null; });
+        }).catch(function () {});
+      }
+      keepAwake();
+      document.addEventListener("visibilitychange", function () { if (!document.hidden && !wakeLock) keepAwake(); });
+      setInterval(function () { if (!wakeLock) keepAwake(); }, 30000);
+
+      // Go fullscreen on the first touch (browsers require a gesture). Not needed in --kiosk mode.
+      function goFullscreen() {
+        var el = document.documentElement;
+        if (!document.fullscreenElement && el.requestFullscreen) {
+          el.requestFullscreen().catch(function () {});
+        }
+        if (!wakeLock) keepAwake();
+      }
+
+      // Refresh the page after long idle periods so updates arrive and any glitches clear.
+      var loadedAt = Date.now();
+      setInterval(function () {
+        if (!open && Date.now() - loadedAt > 6 * 3600 * 1000) location.reload();
+      }, 10 * 60 * 1000);
 
       function play() {
         var p = video.play();
@@ -161,6 +195,7 @@
 
       function openForm() {
         if (open) return;
+        goFullscreen();
         open = true;
         userPaused = true;
         video.pause();
