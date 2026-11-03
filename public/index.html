@@ -38,19 +38,27 @@
     }
     #overlay.open { display: flex; }
     #modal {
-      width: 100%; max-width: 560px; max-height: 100%; overflow-y: auto;
+      width: 100%; max-width: 760px; max-height: 100%; overflow-y: auto;
       background: #fff; color: #111; border-radius: 20px; padding: 28px;
       box-shadow: 0 20px 60px rgba(0,0,0,.5); user-select: text;
     }
     h1 { margin: 0 0 6px; font-size: clamp(1.4rem, 4vw, 2rem); }
     p.sub { margin: 0 0 20px; color: #555; font-size: 1.05rem; }
-    label { display: block; font-weight: 600; margin: 14px 0 6px; font-size: 1.05rem; }
-    label small { font-weight: 400; color: #777; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .grid .full { grid-column: 1 / -1; }
+    @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
     input[type=text], input[type=email], input[type=tel] {
-      width: 100%; font-size: 1.25rem; padding: 16px; border-radius: 12px;
-      border: 2px solid #c8ccd2; background: #fafafa; color: #111;
+      width: 100%; font-size: 1.2rem; padding: 18px 20px; border-radius: 16px;
+      border: 1.5px solid #111; background: #fff; color: #111;
     }
-    input:focus { outline: none; border-color: #1a4fd6; background: #fff; }
+    input::placeholder { color: #b5b5b5; }
+    input[type=text]:focus, input[type=email]:focus, input[type=tel]:focus { outline: none; border-width: 2.5px; padding: 17px 19px; }
+    .check { display: flex; align-items: center; gap: 16px; margin: 0 0 18px; font-size: 1.1rem; line-height: 1.3; cursor: pointer; }
+    .check input { appearance: none; -webkit-appearance: none; flex: none; width: 34px; height: 34px; margin: 0;
+      border: 1.5px solid #111; border-radius: 10px; background: #fff; cursor: pointer; position: relative; }
+    .check input:checked { background: #52a852; border-color: #52a852; }
+    .check input:checked::after { content: ""; position: absolute; left: 11px; top: 5px; width: 9px; height: 17px;
+      border: solid #fff; border-width: 0 3px 3px 0; transform: rotate(45deg); }
     .hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
     #error {
       color: #b00020; background: #fdecee; border-radius: 10px;
@@ -62,7 +70,7 @@
       flex: 1; font-size: 1.25rem; font-weight: 700; padding: 18px; border-radius: 14px;
       border: 0; cursor: pointer; min-height: 60px;
     }
-    #submit { background: #1a4fd6; color: #fff; flex: 2; }
+    #submit { background: #52a852; color: #fff; flex: 2; text-transform: uppercase; letter-spacing: .02em; }
     #submit:disabled { opacity: .6; cursor: default; }
     #cancel { background: #e7e9ee; color: #222; }
     #thanks { display: none; text-align: center; padding: 30px 10px; }
@@ -79,17 +87,20 @@
   <div id="overlay" role="dialog" aria-modal="true" aria-labelledby="title">
     <div id="modal">
       <form id="form" novalidate autocomplete="off">
-        <h1 id="title">Register your interest</h1>
-        <p class="sub">Leave your details and we'll be in touch.</p>
+        <h1 id="title">Make your pledge</h1>
+        <p class="sub">Join the UKRBA Responsible Business Pledge.</p>
 
-        <label for="name">Full name</label>
-        <input id="name" name="name" type="text" autocomplete="name" required>
+        <div class="grid">
+          <input id="firstName" name="firstName" type="text" placeholder="First Name" aria-label="First name" autocomplete="given-name" required>
+          <input id="surname" name="surname" type="text" placeholder="Surname" aria-label="Surname" autocomplete="family-name" required>
+          <input id="businessName" name="businessName" type="text" placeholder="Business name" aria-label="Business name" autocomplete="organization">
+          <input id="postcode" name="postcode" type="text" placeholder="Postcode" aria-label="Postcode" autocomplete="postal-code" autocapitalize="characters">
+          <input id="email" name="email" class="full" type="email" inputmode="email" placeholder="Email address" aria-label="Email address" autocomplete="email" autocapitalize="off" required>
+          <input id="phone" name="phone" class="full" type="tel" inputmode="tel" placeholder="Phone Number" aria-label="Phone number" autocomplete="tel">
+        </div>
 
-        <label for="email">Email</label>
-        <input id="email" name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" required>
-
-        <label for="phone">Phone <small>(optional)</small></label>
-        <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel">
+        <label class="check"><input type="checkbox" id="pledge" name="pledge"><span>I'd like to make the UKRBA Responsible Business Pledge.</span></label>
+        <label class="check"><input type="checkbox" id="consent" name="consent"><span>I'm happy for UKRBA to contact me about my pledge, UKRBA Perks and relevant UKRBA opportunities. I can unsubscribe at any time.</span></label>
 
         <div class="hp" aria-hidden="true">
           <label for="website">Website</label>
@@ -100,7 +111,7 @@
 
         <div class="actions">
           <button type="button" id="cancel" class="btn">Cancel</button>
-          <button type="submit" id="submit" class="btn">Submit</button>
+          <button type="submit" id="submit" class="btn">Make my pledge</button>
         </div>
       </form>
       <div id="thanks">
@@ -167,7 +178,7 @@
         form.reset();
         showError("");
         submitBtn.disabled = false;
-        submitBtn.textContent = "Submit";
+        submitBtn.textContent = "Make my pledge";
         if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
         userPaused = false;
         play();
@@ -184,12 +195,18 @@
         e.preventDefault();
         showError("");
         var data = {
-          name: form.name.value.trim(),
+          firstName: form.firstName.value.trim(),
+          surname: form.surname.value.trim(),
+          businessName: form.businessName.value.trim(),
+          postcode: form.postcode.value.trim(),
           email: form.email.value.trim(),
           phone: form.phone.value.trim(),
+          pledge: form.pledge.checked,
+          consent: form.consent.checked,
           website: form.website.value
         };
-        if (!data.name) return showError("Please enter your full name.");
+        if (!data.firstName) return showError("Please enter your first name.");
+        if (!data.surname) return showError("Please enter your surname.");
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) return showError("Please enter a valid email address.");
 
         submitBtn.disabled = true;
@@ -209,7 +226,7 @@
           thanksTimer = setTimeout(closeForm, THANKS_MS);
         }).catch(function (err) {
           submitBtn.disabled = false;
-          submitBtn.textContent = "Submit";
+          submitBtn.textContent = "Make my pledge";
           showError(err instanceof TypeError ? "Connection problem. Please check the network and try again." : err.message);
         });
       });

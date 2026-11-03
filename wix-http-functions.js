@@ -4,7 +4,9 @@
 // Setup:
 //  1. Wix Secrets Manager: add a secret named EXHIBITS_API_KEY (same value as the Railway variable).
 //  2. Replace COLLECTION_ID below with your CMS collection ID.
-//  3. Make sure the collection has fields with keys: name, email, phone, source, submittedAt.
+//  3. Make sure the collection has fields with these keys (rename the keys on the left of the
+//     insert below if your collection uses different ones):
+//     firstName, surname, businessName, postcode, email, phone, pledge, consent, source, submittedAt
 
 import { ok, badRequest, forbidden, serverError } from "wix-http-functions";
 import wixData from "wix-data";
@@ -27,20 +29,26 @@ export async function post_exhibitLead(request) {
       return badRequest({ body: { ok: false, error: "Invalid JSON" } });
     }
 
-    const name = String((data && data.name) || "").trim();
-    const email = String((data && data.email) || "").trim();
-    const phone = String((data && data.phone) || "").trim();
+    const str = (v) => String((data && v) || "").trim();
+    const firstName = str(data.firstName);
+    const surname = str(data.surname);
+    const email = str(data.email);
 
-    if (!name || !email) {
-      return badRequest({ body: { ok: false, error: "name and email are required" } });
+    if (!firstName || !email) {
+      return badRequest({ body: { ok: false, error: "firstName and email are required" } });
     }
 
     await wixData.insert(
       COLLECTION_ID,
       {
-        name,
+        firstName,
+        surname,
+        businessName: str(data.businessName),
+        postcode: str(data.postcode),
         email,
-        phone,
+        phone: str(data.phone),
+        pledge: data.pledge === true,
+        consent: data.consent === true,
         source: "exhibits",
         submittedAt: new Date(),
       },

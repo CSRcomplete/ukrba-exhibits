@@ -56,12 +56,21 @@ app.post("/api/submit", async (req, res) => {
       .json({ ok: false, error: "Too many submissions. Please try again later." });
   }
 
-  const name = String(body.name || "").trim().slice(0, 200);
-  const email = String(body.email || "").trim().slice(0, 254);
-  const phone = String(body.phone || "").trim().slice(0, 50);
+  const clean = (v, max) => String(v || "").trim().slice(0, max);
+  const firstName = clean(body.firstName, 100);
+  const surname = clean(body.surname, 100);
+  const businessName = clean(body.businessName, 200);
+  const postcode = clean(body.postcode, 20).toUpperCase();
+  const email = clean(body.email, 254);
+  const phone = clean(body.phone, 50);
+  const pledge = body.pledge === true;
+  const consent = body.consent === true;
 
-  if (!name) {
-    return res.status(400).json({ ok: false, error: "Please enter your full name." });
+  if (!firstName) {
+    return res.status(400).json({ ok: false, error: "Please enter your first name." });
+  }
+  if (!surname) {
+    return res.status(400).json({ ok: false, error: "Please enter your surname." });
   }
   if (!email || !EMAIL_RE.test(email)) {
     return res.status(400).json({ ok: false, error: "Please enter a valid email address." });
@@ -74,7 +83,16 @@ app.post("/api/submit", async (req, res) => {
         "Content-Type": "application/json",
         "x-api-key": EXHIBITS_API_KEY,
       },
-      body: JSON.stringify({ name, email, phone }),
+      body: JSON.stringify({
+        firstName,
+        surname,
+        businessName,
+        postcode,
+        email,
+        phone,
+        pledge,
+        consent,
+      }),
       signal: AbortSignal.timeout(15000),
     });
     if (!upstream.ok) {
