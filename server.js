@@ -46,7 +46,7 @@ app.get("/config", (req, res) =>
   res.json({
     videoUrl: VIDEO_URL,
     inactivitySeconds: INACTIVITY_SECONDS,
-    videoFit: process.env.VIDEO_FIT === "contain" ? "contain" : "cover",
+    videoFit: process.env.VIDEO_FIT === "cover" ? "cover" : "contain",
     videoBackground: process.env.VIDEO_BACKGROUND || "",
     showHint: process.env.SHOW_HINT !== "false",
     sound: process.env.VIDEO_SOUND === "true",

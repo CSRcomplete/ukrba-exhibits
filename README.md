@@ -27,8 +27,8 @@ CMS via `wix-http-functions.js`.
 | `EXHIBITS_API_KEY` | Shared secret sent to Wix as `x-api-key` | (required) |
 | `WIX_ENDPOINT` | Wix function URL | `https://www.ukrba.org/_functions/exhibitLead` |
 | `VIDEO_URL` | Video source | `/video.mp4` |
-| `VIDEO_FIT` | `cover` fills the screen (may crop edges); `contain` shows the whole video | `cover` |
-| `VIDEO_BACKGROUND` | Colour of the bars when `VIDEO_FIT=contain`, e.g. `#ffffff` | black |
+| `VIDEO_FIT` | `contain` shows the whole video in its panel; `cover` fills the panel (may crop edges) | `contain` |
+| `VIDEO_BACKGROUND` | Colour of the video panel behind the video, e.g. `#ffffff` | white |
 | `VIDEO_SOUND` | Set `true` to play the video's audio. Works from the first load in kiosk mode (the `--autoplay-policy` flag above); otherwise it starts muted and sound begins after the first touch. Also check the tablet volume | `false` |
 | `SHOW_HINT` | Set `false` to hide the "Touch the screen" pill (if the video already says it) | `true` |
 | `INACTIVITY_SECONDS` | Idle time before the form closes and the video resumes | `60` |
