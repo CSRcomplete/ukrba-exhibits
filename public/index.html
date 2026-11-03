@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>UKRBA Exhibits</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; height: 100%; overflow: hidden; background: #000;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent; user-select: none;
+    }
+    #bg {
+      position: fixed; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; background: #000;
+    }
+    #tap {
+      position: fixed; inset: 0; background: transparent; border: 0;
+      cursor: pointer; z-index: 5; width: 100%; height: 100%;
+    }
+    #hint {
+      position: fixed; left: 50%; bottom: 8vh; transform: translateX(-50%);
+      z-index: 6; pointer-events: none; color: #fff; text-align: center;
+      font-size: clamp(1.1rem, 3vw, 2rem); font-weight: 600; letter-spacing: .03em;
+      padding: .6em 1.4em; border-radius: 999px;
+      background: rgba(0,0,0,.45); text-shadow: 0 1px 4px rgba(0,0,0,.6);
+      animation: pulse 2.2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: .55; transform: translateX(-50%) scale(1); }
+      50% { opacity: 1; transform: translateX(-50%) scale(1.05); }
+    }
+    #overlay {
+      position: fixed; inset: 0; z-index: 10; display: none;
+      align-items: center; justify-content: center; padding: 16px;
+      background: rgba(0,0,0,.7);
+    }
+    #overlay.open { display: flex; }
+    #modal {
+      width: 100%; max-width: 560px; max-height: 100%; overflow-y: auto;
+      background: #fff; color: #111; border-radius: 20px; padding: 28px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.5); user-select: text;
+    }
+    h1 { margin: 0 0 6px; font-size: clamp(1.4rem, 4vw, 2rem); }
+    p.sub { margin: 0 0 20px; color: #555; font-size: 1.05rem; }
+    label { display: block; font-weight: 600; margin: 14px 0 6px; font-size: 1.05rem; }
+    label small { font-weight: 400; color: #777; }
+    input[type=text], input[type=email], input[type=tel] {
+      width: 100%; font-size: 1.25rem; padding: 16px; border-radius: 12px;
+      border: 2px solid #c8ccd2; background: #fafafa; color: #111;
+    }
+    input:focus { outline: none; border-color: #1a4fd6; background: #fff; }
+    .hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+    #error {
+      color: #b00020; background: #fdecee; border-radius: 10px;
+      padding: 12px 14px; margin-top: 16px; font-size: 1.05rem; display: none;
+    }
+    #error.show { display: block; }
+    .actions { display: flex; gap: 12px; margin-top: 22px; }
+    button.btn {
+      flex: 1; font-size: 1.25rem; font-weight: 700; padding: 18px; border-radius: 14px;
+      border: 0; cursor: pointer; min-height: 60px;
+    }
+    #submit { background: #1a4fd6; color: #fff; flex: 2; }
+    #submit:disabled { opacity: .6; cursor: default; }
+    #cancel { background: #e7e9ee; color: #222; }
+    #thanks { display: none; text-align: center; padding: 30px 10px; }
+    #thanks h1 { font-size: clamp(2rem, 6vw, 3rem); }
+    #modal.done #form { display: none; }
+    #modal.done #thanks { display: block; }
+  </style>
+</head>
+<body>
+  <video id="bg" autoplay muted loop playsinline preload="auto"></video>
+  <button id="tap" type="button" aria-label="Touch the screen to register"></button>
+  <div id="hint">Touch the screen to register</div>
+
+  <div id="overlay" role="dialog" aria-modal="true" aria-labelledby="title">
+    <div id="modal">
+      <form id="form" novalidate autocomplete="off">
+        <h1 id="title">Register your interest</h1>
+        <p class="sub">Leave your details and we'll be in touch.</p>
+
+        <label for="name">Full name</label>
+        <input id="name" name="name" type="text" autocomplete="name" required>
+
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" required>
+
+        <label for="phone">Phone <small>(optional)</small></label>
+        <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel">
+
+        <div class="hp" aria-hidden="true">
+          <label for="website">Website</label>
+          <input id="website" name="website" type="text" tabindex="-1" autocomplete="off">
+        </div>
+
+        <div id="error" role="alert"></div>
+
+        <div class="actions">
+          <button type="button" id="cancel" class="btn">Cancel</button>
+          <button type="submit" id="submit" class="btn">Submit</button>
+        </div>
+      </form>
+      <div id="thanks">
+        <h1>Thank you!</h1>
+        <p class="sub">We've received your details.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var video = document.getElementById("bg");
+      var overlay = document.getElementById("overlay");
+      var modal = document.getElementById("modal");
+      var form = document.getElementById("form");
+      var errorBox = document.getElementById("error");
+      var submitBtn = document.getElementById("submit");
+      var INACTIVITY_MS = 60000, THANKS_MS = 4000;
+      var idleTimer = null, thanksTimer = null, open = false, userPaused = false;
+
+      fetch("/config").then(function (r) { return r.json(); })
+        .then(function (c) { video.src = c.videoUrl || "/video.mp4"; play(); })
+        .catch(function () { video.src = "/video.mp4"; play(); });
+
+      function play() {
+        var p = video.play();
+        if (p && p.catch) p.catch(function () {});
+      }
+      video.addEventListener("pause", function () {
+        if (!userPaused && !document.hidden) setTimeout(play, 300);
+      });
+      video.addEventListener("ended", play);
+      video.addEventListener("stalled", play);
+      document.addEventListener("visibilitychange", function () { if (!document.hidden && !open) play(); });
+      // Some browsers block autoplay until first interaction.
+      document.addEventListener("pointerdown", function () { if (!open && video.paused) play(); }, true);
+
+      function showError(msg) {
+        errorBox.textContent = msg;
+        errorBox.classList.toggle("show", !!msg);
+      }
+
+      function resetIdle() {
+        clearTimeout(idleTimer);
+        if (open) idleTimer = setTimeout(closeForm, INACTIVITY_MS);
+      }
+
+      function openForm() {
+        if (open) return;
+        open = true;
+        userPaused = true;
+        video.pause();
+        modal.classList.remove("done");
+        overlay.classList.add("open");
+        resetIdle();
+      }
+
+      function closeForm() {
+        open = false;
+        clearTimeout(idleTimer);
+        clearTimeout(thanksTimer);
+        overlay.classList.remove("open");
+        modal.classList.remove("done");
+        form.reset();
+        showError("");
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit";
+        if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+        userPaused = false;
+        play();
+      }
+
+      document.getElementById("tap").addEventListener("click", openForm);
+      document.getElementById("cancel").addEventListener("click", closeForm);
+      overlay.addEventListener("click", function (e) { if (e.target === overlay) closeForm(); });
+      ["pointerdown", "keydown", "input", "touchstart", "scroll"].forEach(function (ev) {
+        overlay.addEventListener(ev, resetIdle, true);
+      });
+
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        showError("");
+        var data = {
+          name: form.name.value.trim(),
+          email: form.email.value.trim(),
+          phone: form.phone.value.trim(),
+          website: form.website.value
+        };
+        if (!data.name) return showError("Please enter your full name.");
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) return showError("Please enter a valid email address.");
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Sending...";
+        fetch("/api/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        }).then(function (r) {
+          return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok, body: j }; });
+        }).then(function (res) {
+          if (!res.ok || !res.body.ok) {
+            throw new Error(res.body.error || "Something went wrong. Please try again.");
+          }
+          clearTimeout(idleTimer);
+          modal.classList.add("done");
+          thanksTimer = setTimeout(closeForm, THANKS_MS);
+        }).catch(function (err) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Submit";
+          showError(err instanceof TypeError ? "Connection problem. Please check the network and try again." : err.message);
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

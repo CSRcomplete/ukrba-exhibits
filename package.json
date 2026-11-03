@@ -1,0 +1,16 @@
+{
+  "name": "ukrba-exhibits",
+  "version": "1.0.0",
+  "description": "UKRBA exhibit kiosk: looping video with a touch-to-register form that forwards to Wix",
+  "main": "server.js",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
