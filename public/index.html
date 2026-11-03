@@ -77,10 +77,12 @@
     #submit { background: #52a852; color: #fff; flex: 2; text-transform: uppercase; letter-spacing: .02em; }
     #submit:disabled { opacity: .6; cursor: default; }
     #cancel { background: #e7e9ee; color: #222; }
-    #thanks { display: none; text-align: center; padding: 30px 10px; }
-    #thanks h1 { font-size: clamp(2rem, 6vw, 3rem); }
-    #modal.done #form { display: none; }
-    #modal.done #thanks { display: block; }
+    #thanksScreen {
+      position: fixed; inset: 0; z-index: 20; display: none; background: #fff;
+      align-items: center; justify-content: center;
+    }
+    #thanksScreen.show { display: flex; }
+    #thanksScreen img { width: 100%; height: 100%; object-fit: contain; }
   </style>
 </head>
 <body>
@@ -118,12 +120,9 @@
           <button type="submit" id="submit" class="btn">Make my pledge</button>
         </div>
       </form>
-      <div id="thanks">
-        <h1>Thank you!</h1>
-        <p class="sub">We've received your details.</p>
-      </div>
     </div>
   </div>
+  <div id="thanksScreen" aria-live="polite"><img src="/thank-you.png" alt="Thank you! You've just taken the first step on your Responsible Business Journey."></div>
 
   <script>
     (function () {
@@ -133,7 +132,8 @@
       var form = document.getElementById("form");
       var errorBox = document.getElementById("error");
       var submitBtn = document.getElementById("submit");
-      var INACTIVITY_MS = 60000, THANKS_MS = 4000;
+      var INACTIVITY_MS = 60000, THANKS_MS = 6000;
+      var thanksScreen = document.getElementById("thanksScreen");
       var idleTimer = null, thanksTimer = null, open = false, userPaused = false;
 
       fetch("/config").then(function (r) { return r.json(); })
@@ -216,7 +216,6 @@
         open = true;
         userPaused = true;
         video.pause();
-        modal.classList.remove("done");
         overlay.classList.add("open");
         resetIdle();
       }
@@ -226,7 +225,7 @@
         clearTimeout(idleTimer);
         clearTimeout(thanksTimer);
         overlay.classList.remove("open");
-        modal.classList.remove("done");
+        thanksScreen.classList.remove("show");
         form.reset();
         showError("");
         submitBtn.disabled = false;
@@ -274,7 +273,7 @@
             throw new Error(res.body.error || "Something went wrong. Please try again.");
           }
           clearTimeout(idleTimer);
-          modal.classList.add("done");
+          thanksScreen.classList.add("show");
           thanksTimer = setTimeout(closeForm, THANKS_MS);
         }).catch(function (err) {
           submitBtn.disabled = false;
