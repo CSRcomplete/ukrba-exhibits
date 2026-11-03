@@ -49,6 +49,7 @@ app.get("/config", (req, res) =>
     videoFit: process.env.VIDEO_FIT === "contain" ? "contain" : "cover",
     videoBackground: process.env.VIDEO_BACKGROUND || "",
     showHint: process.env.SHOW_HINT !== "false",
+    sound: process.env.VIDEO_SOUND === "true",
   })
 );
 

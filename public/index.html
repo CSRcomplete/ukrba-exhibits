@@ -141,6 +141,7 @@
           video.src = c.videoUrl || "/video.mp4";
           if (c.videoFit === "contain") video.style.objectFit = "contain";
           if (c.videoBackground) { video.style.background = c.videoBackground; document.body.style.background = c.videoBackground; }
+          if (c.sound) { wantSound = true; video.muted = false; }
           if (c.showHint === false) document.getElementById("hint").classList.add("off");
           if (c.inactivitySeconds > 0) INACTIVITY_MS = c.inactivitySeconds * 1000;
           play();
@@ -175,9 +176,20 @@
         if (!open && Date.now() - loadedAt > 6 * 3600 * 1000) location.reload();
       }, 10 * 60 * 1000);
 
+      var wantSound = false;
       function play() {
         var p = video.play();
-        if (p && p.catch) p.catch(function () {});
+        if (p && p.catch) p.catch(function (err) {
+          // Browser refused to autoplay with sound: fall back to muted until the first touch.
+          if (wantSound && !video.muted) {
+            video.muted = true;
+            var q = video.play();
+            if (q && q.catch) q.catch(function () {});
+          }
+        });
+      }
+      function unmute() {
+        if (wantSound && video.muted) video.muted = false;
       }
       video.addEventListener("pause", function () {
         if (!userPaused && !document.hidden) setTimeout(play, 300);
@@ -186,7 +198,7 @@
       video.addEventListener("stalled", play);
       document.addEventListener("visibilitychange", function () { if (!document.hidden && !open) play(); });
       // Some browsers block autoplay until first interaction.
-      document.addEventListener("pointerdown", function () { if (!open && video.paused) play(); }, true);
+      document.addEventListener("pointerdown", function () { unmute(); if (!open && video.paused) play(); }, true);
 
       function showError(msg) {
         errorBox.textContent = msg;

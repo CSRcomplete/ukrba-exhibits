@@ -29,6 +29,7 @@ CMS via `wix-http-functions.js`.
 | `VIDEO_URL` | Video source | `/video.mp4` |
 | `VIDEO_FIT` | `cover` fills the screen (may crop edges); `contain` shows the whole video | `cover` |
 | `VIDEO_BACKGROUND` | Colour of the bars when `VIDEO_FIT=contain`, e.g. `#ffffff` | black |
+| `VIDEO_SOUND` | Set `true` to play the video's audio. Works from the first load in kiosk mode (the `--autoplay-policy` flag above); otherwise it starts muted and sound begins after the first touch. Also check the tablet volume | `false` |
 | `SHOW_HINT` | Set `false` to hide the "Touch the screen" pill (if the video already says it) | `true` |
 | `INACTIVITY_SECONDS` | Idle time before the form closes and the video resumes | `60` |
 
