@@ -3,16 +3,16 @@
 //
 // Setup:
 //  1. Wix Secrets Manager: add a secret named EXHIBITS_API_KEY (same value as the Railway variable).
-//  2. Replace COLLECTION_ID below with your CMS collection ID.
-//  3. Make sure the collection has fields with these keys (rename the keys on the left of the
-//     insert below if your collection uses different ones):
-//     firstName, surname, businessName, postcode, email, phone, pledge, consent, source, submittedAt
+//  2. Collection "Pledges" fields used: title (first name), surname, businessName, emailAddress,
+//     mobileNumber, iPledge (boolean), contactConsent (boolean), refId.
+//  3. The form also collects postcode, but the Pledges collection has no postcode field yet. To save it,
+//     add a text field "postcode" to the collection and add `postcode: str(data.postcode),` to the insert.
 
 import { ok, badRequest, forbidden, serverError } from "wix-http-functions";
 import wixData from "wix-data";
 import { getSecret } from "wix-secrets-backend";
 
-const COLLECTION_ID = "YourCollectionID";
+const COLLECTION_ID = "Pledges";
 
 export async function post_exhibitLead(request) {
   try {
@@ -29,9 +29,8 @@ export async function post_exhibitLead(request) {
       return badRequest({ body: { ok: false, error: "Invalid JSON" } });
     }
 
-    const str = (v) => String((data && v) || "").trim();
+    const str = (v) => String(v || "").trim();
     const firstName = str(data.firstName);
-    const surname = str(data.surname);
     const email = str(data.email);
 
     if (!firstName || !email) {
@@ -41,16 +40,14 @@ export async function post_exhibitLead(request) {
     await wixData.insert(
       COLLECTION_ID,
       {
-        firstName,
-        surname,
+        title: firstName,
+        surname: str(data.surname),
         businessName: str(data.businessName),
-        postcode: str(data.postcode),
-        email,
-        phone: str(data.phone),
-        pledge: data.pledge === true,
-        consent: data.consent === true,
-        source: "exhibits",
-        submittedAt: new Date(),
+        emailAddress: email,
+        mobileNumber: str(data.phone),
+        iPledge: data.pledge === true,
+        contactConsent: data.consent === true,
+        refId: "shows",
       },
       { suppressAuth: true }
     );
