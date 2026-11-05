@@ -13,15 +13,15 @@
       overscroll-behavior: none; touch-action: manipulation;
     }
     #tap { cursor: none; }
-    #page { position: fixed; inset: 0; display: flex; flex-direction: column; background: #fff; color: #17325c; }
-    #intro { flex: none; padding: min(1.6vh, 14px) min(4vw, 40px) min(1vh, 8px); text-align: center; --fs: clamp(.9rem, min(2.3vh, 3.9vw), 1.35rem); }
-    #logo { display: block; height: min(10vh, 90px); max-width: 70vw; margin: 0 auto min(.8vh, 6px); object-fit: contain; }
-    #intro h1 { margin: 0 0 .1em; font-size: calc(var(--fs) * 1.7); line-height: 1.15; color: #17325c; }
-    #intro p.lead { margin: 0 auto min(1vh, 8px); max-width: 44em; font-size: var(--fs); line-height: 1.3; color: #333; }
+    #pledgeIntro { text-align: center; margin-bottom: 8px; --fs: clamp(14px, 3.6vw, 18px); color: #17325c; }
+    #logo { display: block; height: 72px; max-width: 70%; margin: 0 auto 12px; object-fit: contain; }
+    #pledgeIntro h1 { margin: 0 0 6px; font-size: 24px; line-height: 1.15; color: #17325c; }
+    #pledgeIntro p.lead { margin: 0 auto 12px; max-width: 44em; font-size: var(--fs); line-height: 1.35; color: #333; }
     #commitments {
-      list-style: none; margin: 0 auto; padding: 0; max-width: 640px; text-align: left;
-      display: flex; flex-direction: column; gap: min(.7vh, 5px);
+      list-style: none; margin: 0 auto; padding: 0; text-align: left;
+      display: flex; flex-direction: column; gap: 6px;
     }
+    h2.details { margin: 24px 0 14px; font-size: 24px; color: #17325c; }
     #commitments li {
       display: flex; align-items: center; gap: .7em; font-size: var(--fs); line-height: 1.25;
       padding: .35em .7em; border: 1.5px solid #cfe3d6; border-radius: .7em; background: #f6fbf8;
@@ -31,7 +31,7 @@
       background: no-repeat center / 75% url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 12.5l5 5L20 6.5' fill='none' stroke='%232e8b57' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     }
     #commitments li.confirm { font-weight: 600; background: #eaf6ee; border-color: #2e8b57; }
-    #stage { flex: 1 1 0; min-height: 0; background: #fff; position: relative; }
+    #stage { position: fixed; inset: 0; background: #fff; }
     #bg { display: block; width: 100%; height: 100%; object-fit: contain; background: #fff; }
     #tap {
       position: absolute; inset: 0; background: transparent; border: 0; padding: 0;
@@ -66,7 +66,7 @@
     p.sub { margin: 0 0 20px; color: #555; font-size: 1.05rem; }
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
     .grid .full { grid-column: 1 / -1; }
-    @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
+    @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } #modal { padding: 20px; } }
     input[type=text], input[type=email], input[type=tel] {
       width: 100%; font-size: 1.2rem; padding: 18px 20px; border-radius: 16px;
       border: 1.5px solid #111; background: #fff; color: #111;
@@ -102,32 +102,29 @@
   </style>
 </head>
 <body>
-  <main id="page">
-    <header id="intro">
-      <img id="logo" src="/logo.png" alt="UK SME Responsible Business Association" onerror="this.style.display='none'">
-      <h1>Your Pledge</h1>
-      <p class="lead">By taking the Responsible Business Pledge, you confirm that your business is committed to the following:</p>
-      <ul id="commitments">
-        <li>We will look after our people</li>
-        <li>We will support our community</li>
-        <li>We will reduce our environmental impact</li>
-        <li>We will run our business responsibly</li>
-        <li class="confirm">I confirm our business supports these four Responsible Business Pledge commitments.</li>
-      </ul>
-    </header>
-    <div id="stage">
-      <video id="bg" autoplay muted loop playsinline preload="auto"></video>
-      <button id="tap" type="button" aria-label="Touch the video to take the pledge"></button>
-    </div>
-  </main>
+  <div id="stage">
+    <video id="bg" autoplay muted loop playsinline preload="auto"></video>
+    <button id="tap" type="button" aria-label="Touch the screen to take the pledge"></button>
+  </div>
   <div id="hint">Touch the screen to take the pledge</div>
 
   <div id="overlay" role="dialog" aria-modal="true" aria-labelledby="title">
     <div id="modal">
       <form id="form" novalidate autocomplete="off">
-        <h1 id="title">Make your pledge</h1>
-        <p class="sub">Join the UKRBA Responsible Business Pledge.</p>
+        <div id="pledgeIntro">
+          <img id="logo" src="/logo.png" alt="UK SME Responsible Business Association" onerror="this.style.display='none'">
+          <h1 id="title">Your Pledge</h1>
+          <p class="lead">By taking the Responsible Business Pledge, you confirm that your business is committed to the following:</p>
+          <ul id="commitments">
+            <li>We will look after our people</li>
+            <li>We will support our community</li>
+            <li>We will reduce our environmental impact</li>
+            <li>We will run our business responsibly</li>
+            <li class="confirm">I confirm our business supports these four Responsible Business Pledge commitments.</li>
+          </ul>
+        </div>
 
+        <h2 class="details">Your Details</h2>
         <div class="grid">
           <input id="firstName" name="firstName" type="text" placeholder="First Name" aria-label="First name" autocomplete="given-name" required>
           <input id="surname" name="surname" type="text" placeholder="Surname" aria-label="Surname" autocomplete="family-name" required>
@@ -249,6 +246,7 @@
         userPaused = true;
         video.pause();
         overlay.classList.add("open");
+        modal.scrollTop = 0;
         resetIdle();
       }
 
