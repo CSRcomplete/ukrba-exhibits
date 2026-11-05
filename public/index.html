@@ -14,21 +14,23 @@
     }
     #tap { cursor: none; }
     #page { position: fixed; inset: 0; display: flex; flex-direction: column; background: #fff; color: #17325c; }
-    #intro { flex: none; padding: min(2.2vh, 20px) min(4vw, 48px) min(1.2vh, 10px); text-align: center; }
-    #logo { display: block; height: min(9vh, 90px); max-width: 60vw; margin: 0 auto min(1.2vh, 10px); object-fit: contain; }
-    #intro h1 { margin: 0 0 .15em; font-size: clamp(1.8rem, 6vh, 3.6rem); color: #17325c; }
-    #intro p.lead { margin: 0 auto min(1.6vh, 14px); max-width: 52em; font-size: clamp(1.05rem, 3vh, 1.9rem); line-height: 1.3; color: #222; }
+    #intro { flex: none; padding: min(1.6vh, 14px) min(4vw, 40px) min(1vh, 8px); text-align: center; --fs: clamp(.9rem, min(2.3vh, 3.9vw), 1.35rem); }
+    #logo { display: block; height: min(10vh, 90px); max-width: 70vw; margin: 0 auto min(.8vh, 6px); object-fit: contain; }
+    #intro h1 { margin: 0 0 .1em; font-size: calc(var(--fs) * 1.7); line-height: 1.15; color: #17325c; }
+    #intro p.lead { margin: 0 auto min(1vh, 8px); max-width: 44em; font-size: var(--fs); line-height: 1.3; color: #333; }
     #commitments {
-      list-style: none; margin: 0 auto min(1.4vh, 12px); padding: 0; max-width: 1100px;
-      display: grid; grid-template-columns: 1fr 1fr; gap: min(1vh, 8px) min(3vw, 36px); text-align: left;
+      list-style: none; margin: 0 auto; padding: 0; max-width: 640px; text-align: left;
+      display: flex; flex-direction: column; gap: min(.7vh, 5px);
     }
-    #commitments li { display: flex; align-items: center; gap: .6em; font-size: clamp(1.05rem, 3vh, 1.9rem); }
-    #commitments li::before, #confirm::before {
-      content: ""; flex: none; width: 1.5em; height: 1.5em; border: 2.5px solid #2e8b57; border-radius: .35em;
-      background: no-repeat center / 70% url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 12.5l5 5L20 6.5' fill='none' stroke='%232e8b57' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    #commitments li {
+      display: flex; align-items: center; gap: .7em; font-size: var(--fs); line-height: 1.25;
+      padding: .35em .7em; border: 1.5px solid #cfe3d6; border-radius: .7em; background: #f6fbf8;
     }
-    #confirm { display: flex; align-items: center; justify-content: center; gap: .6em; margin: 0; font-size: clamp(1.05rem, 3vh, 1.8rem); text-align: left; }
-    @media (max-width: 640px) { #commitments { grid-template-columns: 1fr; } }
+    #commitments li::before {
+      content: ""; flex: none; width: 1.4em; height: 1.4em; border: 2px solid #2e8b57; border-radius: .3em;
+      background: no-repeat center / 75% url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 12.5l5 5L20 6.5' fill='none' stroke='%232e8b57' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    }
+    #commitments li.confirm { font-weight: 600; background: #eaf6ee; border-color: #2e8b57; }
     #stage { flex: 1 1 0; min-height: 0; background: #fff; }
     #bg { display: block; width: 100%; height: 100%; object-fit: contain; background: #fff; }
     #tap {
@@ -102,7 +104,7 @@
 <body>
   <main id="page">
     <header id="intro">
-      <img id="logo" src="/logo.png" alt="UKRBA" onerror="this.style.display='none'">
+      <img id="logo" src="/logo.png" alt="UK SME Responsible Business Association" onerror="this.style.display='none'">
       <h1>Your Pledge</h1>
       <p class="lead">By taking the Responsible Business Pledge, you confirm that your business is committed to the following:</p>
       <ul id="commitments">
@@ -110,8 +112,8 @@
         <li>We will support our community</li>
         <li>We will reduce our environmental impact</li>
         <li>We will run our business responsibly</li>
+        <li class="confirm">I confirm our business supports these four Responsible Business Pledge commitments.</li>
       </ul>
-      <p id="confirm">I confirm our business supports these four Responsible Business Pledge commitments.</p>
     </header>
     <div id="stage"><video id="bg" autoplay muted loop playsinline preload="auto"></video></div>
   </main>
